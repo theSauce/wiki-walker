@@ -14,7 +14,7 @@ import org.springframework.stereotype.Component;
 
 import org.wiki.parse.HTMLParser;
 
-//????
+//???? More Noose check
 
 @Component
 public class WikiWalker {
