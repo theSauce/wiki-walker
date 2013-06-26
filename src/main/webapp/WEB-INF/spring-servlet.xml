@@ -10,7 +10,7 @@
  
   
     <context:component-scan
-        base-package="org.wiki" />
+        base-package="org.wiki.walker.walker" />
    
    
    <!--  

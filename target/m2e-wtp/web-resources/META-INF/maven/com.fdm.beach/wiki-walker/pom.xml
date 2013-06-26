@@ -11,6 +11,14 @@
   <build>
    <pluginManagement>
    <plugins>
+    <plugin>
+      <artifactId>maven-compiler-plugin</artifactId>
+      <version>2.0.2</version>
+      <configuration>
+         <source>1.6</source>
+         <target>1.6</target>
+      </configuration>
+    </plugin>
    <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-war-plugin</artifactId>
@@ -101,6 +109,7 @@
      <artifactId>spring-test</artifactId>
      <version>3.2.0.RELEASE</version>
     </dependency>
+    <!-- 
 <dependency>
   <groupId>de.tudarmstadt.ukp.wikipedia</groupId>
   <artifactId>de.tudarmstadt.ukp.wikipedia.api</artifactId>
@@ -135,7 +144,17 @@
   <groupId>de.tudarmstadt.ukp.wikipedia</groupId>
   <artifactId>de.tudarmstadt.ukp.wikipedia.parser</artifactId>
   <version>0.9.2</version>
-</dependency>
+</dependency>-->
+    <dependency>
+    	<groupId>org.springframework</groupId>
+    	<artifactId>spring-core</artifactId>
+    	<version>3.2.3.RELEASE</version>
+    </dependency>
+    <dependency>
+    	<groupId>org.springframework</groupId>
+    	<artifactId>spring-context</artifactId>
+    	<version>3.2.3.RELEASE</version>
+    </dependency>
   </dependencies>
   <scm>
   	<url>scm:git:https://github.com/theSauce/wiki-walker</url>
