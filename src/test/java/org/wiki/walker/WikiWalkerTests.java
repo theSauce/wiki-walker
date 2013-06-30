@@ -21,7 +21,7 @@ import de.tudarmstadt.ukp.wikipedia.api.exception.WikiInitializationException;
 public class WikiWalkerTests {
 
 	//@Autowired
-	private WikiWalker walker = new WikiWalker();
+	private JWPLWikiWalker walker = new JWPLWikiWalker();
 	
 	@Before
 	public void setUp() throws Exception {
@@ -51,7 +51,7 @@ public class WikiWalkerTests {
 	public void tearDown() throws Exception {
 	}
 
-	public void setWalker(WikiWalker walker){
+	public void setWalker(JWPLWikiWalker walker){
 		this.walker = walker;
 	}
 }
