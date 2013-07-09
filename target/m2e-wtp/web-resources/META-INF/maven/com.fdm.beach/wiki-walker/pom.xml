@@ -160,7 +160,49 @@
     	<artifactId>trove4j</artifactId>
     	<version>3.0.3</version>
     </dependency>
+    <dependency>
+    	<groupId>org.springframework</groupId>
+    	<artifactId>spring-jdbc</artifactId>
+    	<version>3.2.3.RELEASE</version>
+    </dependency>
+	<dependency>
+		<groupId>com.google.guava</groupId>
+		<artifactId>guava</artifactId>
+		<version>r09</version>
+	</dependency>
+	<dependency>
+		<groupId>com.jolbox</groupId>
+		<artifactId>bonecp</artifactId>
+		<version>0.7.1-rc3</version>
+		<scope>compile</scope>
+	</dependency>
+	<dependency>
+		<groupId>org.slf4j</groupId>
+		<artifactId>slf4j-log4j12</artifactId>
+		<version>1.7.5</version>
+	</dependency>
+	<!-- <dependency>
+	   <groupId>com.ning</groupId>
+	   <artifactId>metrics.action</artifactId>
+	   <version>0.0.5</version>
+	   <classifier>jar-with-dependencies</classifier>
+	</dependency> -->
+	<dependency>
+		<groupId>org.slf4j</groupId>
+		<artifactId>slf4j-api</artifactId>
+		<version>1.7.5</version>
+	</dependency>
   </dependencies>
+  	<repositories>
+		<repository>
+		  <releases>
+                <enabled>true</enabled>
+            </releases>
+			<id>bonecp-repo</id>
+			<name>BoneCP Repository</name>
+			<url>http://jolbox.com/bonecp/downloads/maven</url>
+		</repository>
+	</repositories>
   <scm>
   	<url>scm:git:https://github.com/theSauce/wiki-walker</url>
   </scm>

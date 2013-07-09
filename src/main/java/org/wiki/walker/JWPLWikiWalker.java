@@ -1,5 +1,8 @@
 package org.wiki.walker;
 
+import gnu.trove.map.hash.TIntIntHashMap;
+import gnu.trove.set.hash.TIntHashSet;
+
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
@@ -33,13 +36,16 @@ public class JWPLWikiWalker implements WikiWalker {
 	private Log logger = LogFactory.getLog(getClass());
 	
 	private Map<Integer, Integer> shortestDistances = new HashMap<Integer, Integer>();
+	//private TIntIntHashMap shortestDistances = new TIntIntHashMap();
 	
 	private WikiQueue unsettled = new WikiQueue();
 	
-	private Set<Integer> settled = new HashSet<Integer>();
+	//private Set<Integer> settled = new HashSet<Integer>();
+	private TIntHashSet settled = new TIntHashSet();
 	
 	//private Map<Integer, Integer> predecessors = new HashMap<Integer, Integer>();
-	private int[] predecessors = new int[40000000];
+	//private int[] predecessors = new int[40000000];
+	private TIntIntHashMap predecessors = new TIntIntHashMap();
 	
 	@Autowired
 	private Wikipedia wiki;
@@ -51,7 +57,7 @@ public class JWPLWikiWalker implements WikiWalker {
 	public JWPLWikiWalker( Wikipedia wiki){
 		this.wiki = wiki;
 		Date start = new Date();
-		System.out.println( getWalk("Samuel_L._Jackson", "Scientology") );
+		System.out.println( getWalk("Michael_Jordan", "Paul_Silas") );
 		System.out.println( (new Date().getTime() - start.getTime())/(1000) + " seconds");
 	}
 	
@@ -94,7 +100,7 @@ public class JWPLWikiWalker implements WikiWalker {
 		        	
 		        	current = unsettled.poll();
 		        	
-		            assert !settled.contains( current );
+		            assert !settled.contains( current.getId() );
 		            
 		            if ( current.getId() == end ) break;
 		            
@@ -114,7 +120,7 @@ public class JWPLWikiWalker implements WikiWalker {
 				List<String> walk = new LinkedList<String>();
 				while ( iterator != start ) {
 					walk.add( wiki.getPage( iterator ).getTitle().toString() );
-					iterator = predecessors[iterator];
+					iterator = predecessors.get(iterator);
 				}
 				walk.add( wiki.getPage( iterator ).getTitle().toString() );
 				
@@ -140,7 +146,7 @@ public class JWPLWikiWalker implements WikiWalker {
         	WikiNode neighbor = new WikiNode(neighborId);
         	//if( !wiki.getPage( neighbor ).isDisambiguation() ){
 	        	
-	        	if ( settled.contains( neighbor ) ) continue;
+	        	if ( settled.contains( neighbor.getId() ) ) continue;
 	            
 	            int shortDist = getShortestDistance( id.getId() ) + 1;
 	            
@@ -149,7 +155,7 @@ public class JWPLWikiWalker implements WikiWalker {
 	                setShortestDistance(neighbor, shortDist);
 	                                
 	                //predecessors.put(neighbor.getId(), id.getId());
-	                predecessors[neighbor.getId()] = id.getId();
+	                predecessors.put( neighbor.getId(), id.getId() );
 	            }
         	//}
         }        

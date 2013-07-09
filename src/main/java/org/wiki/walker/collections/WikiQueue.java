@@ -1,5 +1,7 @@
 package org.wiki.walker.collections;
 
+import gnu.trove.map.hash.TIntObjectHashMap;
+
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -29,7 +31,8 @@ public final class WikiQueue implements Ordered<WikiNode> {
 
 	private Log logger = LogFactory.getLog(getClass());
 	
-	private Map<Integer, TreeSet<WikiNode>> buckets = new HashMap<Integer, TreeSet<WikiNode>>();
+	//private Map<Integer, TreeSet<WikiNode>> buckets = new HashMap<Integer, TreeSet<WikiNode>>();
+	private TIntObjectHashMap<TreeSet<WikiNode>> buckets = new TIntObjectHashMap<TreeSet<WikiNode>>();
 	
 	private TreeSet<Integer> hashes = new TreeSet<Integer>();
 	
