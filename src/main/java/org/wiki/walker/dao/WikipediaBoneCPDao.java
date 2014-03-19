@@ -7,6 +7,8 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 
 import gnu.trove.set.hash.TIntHashSet;
 
@@ -14,6 +16,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
+import org.wiki.walker.WikiUtils;
 
 import com.jolbox.bonecp.BoneCP;
 
@@ -27,15 +30,11 @@ public class WikipediaBoneCPDao implements WikiDao{
 	
 	private BoneCP boneCP;
 	
+	private static final String SQL_WILDCARD = "%";
+	private static final String GET_NAMES_SELECT_CLAUSE = "SELECT name FROM wikipedia.page";
 	private static final String GET_ID = "select id from wikipedia.page where name = ?";
-	private static final String GET_TITLE = "select name from wikipedia.page where id = ?";
+	private static final String GET_TITLE = GET_NAMES_SELECT_CLAUSE + " where id = ?";
 	private static final String GET_OUTLINKS = "SELECT outLinks FROM wikipedia.page_outlinks where id = ?";
-	
-	//for testing
-//	public WikipediaDao( JdbcTemplate template ){
-//		this.template = template;
-//		System.err.println( getOutlinks(87530) );
-//	}
 	
 	private PreparedStatement getId;
 	public int getId( String title ){
@@ -47,7 +46,10 @@ public class WikipediaBoneCPDao implements WikiDao{
 			ResultSet rs = getId.executeQuery();
 			
 			int id = -1;
-			if( !rs.next() ) return id;
+			if( !rs.next() ) {
+				conn.close();
+				return id;
+			}
 		
 			id = rs.getInt( 1 );
 		
@@ -70,7 +72,10 @@ public class WikipediaBoneCPDao implements WikiDao{
 			ResultSet rs = getTitle.executeQuery();
 			
 			String title = null;
-			if( !rs.next() ) return title;
+			if( !rs.next() ) {
+				conn.close();
+				return title;
+			}
 			
 			title = rs.getString( 1 );	
 			
@@ -107,6 +112,49 @@ public class WikipediaBoneCPDao implements WikiDao{
 		return null;
 	}
 
+	public List<String> getNamesByTokens(List<String> tokens) {
+		
+		if( WikiUtils.hasAValue( tokens ) ){
+			
+			logger.info("Searching for possible article names using the tokens: " + tokens );
+			
+			StringBuilder sql = new StringBuilder(GET_NAMES_SELECT_CLAUSE + " where name like '");
+			
+			for( String token : tokens ){
+				if( token != null && token.trim().length() > 0){
+					sql.append(token);
+					sql.append(SQL_WILDCARD);
+				}
+			}
+			sql.append("'");
+		
+			logger.info("Searching with SQL: " + sql );
+			
+			try {
+				Connection conn = boneCP.getConnection();
+				PreparedStatement statement = conn.prepareStatement(sql.toString());
+				ResultSet rs = statement.executeQuery();
+				
+				List<String> names = new ArrayList<String>();
+				while( rs.next() ){
+					names.add( rs.getString(1) );
+				}
+				
+				conn.close();
+				
+				logger.info("Found names: " + names);
+				return names;
+				
+			} catch (SQLException e){
+				e.printStackTrace();
+			}
+		} 
+		
+		logger.info("Requested to search for possible article names with NULL tokens.");
+		
+		return null;
+	}
+	
 	public BoneCP getBoneCP() {
 		return boneCP;
 	}
@@ -114,8 +162,5 @@ public class WikipediaBoneCPDao implements WikiDao{
 	public void setBoneCP(BoneCP boneCP) {
 		this.boneCP = boneCP;
 	}
-	
-	
-	
 
 }

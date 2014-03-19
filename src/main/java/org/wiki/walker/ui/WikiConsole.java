@@ -1,31 +1,45 @@
 package org.wiki.walker.ui;
 
 import java.util.Date;
+import java.util.List;
 import java.util.Scanner;
 
+import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.wiki.walker.WikiWalker;
+import org.wiki.walker.format.WikiFormatter;
+
+import de.tudarmstadt.ukp.wikipedia.api.exception.WikiApiException;
 
 public class WikiConsole {
 
 	private static WikiWalker walker;
 	
+	private static String start;
+	private static String end;
 	/**
 	 * @param args
 	 */
 	public static void main(String[] args) {
 
-		System.out.println("WIKI WALKER\n\nType in a start and end article, \"*\" separated:\n");
+		new ClassPathXmlApplicationContext( args[0] );
+		
+		System.out.println("WIKI WALKER\n\nType in a starting article:");
 		
 		Scanner in = new Scanner( System.in );
 		
 		while( in.hasNext() ){
 			
-			handleInput( in.nextLine(), in );
-			//System.sleep(100);
+			try {
+				handleInput( in.nextLine(), in );
+			} catch (WikiApiException e) {
+				e.printStackTrace();
+				in.close();
+				System.exit(0);
+			}
 		}
 	}
 
-	private static void handleInput(String nextLine, Scanner in) {
+	private static void handleInput(String nextLine, Scanner in) throws WikiApiException {
 		
 		if( nextLine != null ){
 			
@@ -34,23 +48,66 @@ public class WikiConsole {
 				System.exit(0);
 			}
 			
-			String[] articles = nextLine.split("*");
-			
-			if( articles.length != 2 ){
-				System.out.println("You done fucked up. Try again.");
-				return;
+			if( "|Random|".equalsIgnoreCase( nextLine ) ){
+				start = null;
+				end = null;
+				getRandomWikiWalk();
 			}
 			
-			Date start = new Date();
-			String result = walker.getWalk( articles[0], articles[1]);
+			String formattedInput = WikiFormatter.asArticleName( nextLine );
 			
-			if( result == null ){
-				System.out.println("Not wiki articles. Try again.");
+			if( !walker.isTitle( formattedInput ) ){
+				System.out.println("\n" + formattedInput + " is not an article. Did you mean one of these?\n");
+				List<String> suggestions = walker.getArticleSuggestions( formattedInput );
+				if( suggestions != null ) 
+					for( String suggestion : suggestions )
+						System.out.println( suggestion );
+			} else if( walker.isDisambiguationPage( formattedInput ) ){ 
+				System.out.println("\n" + formattedInput + " is a disambiguation page. Be more specific.");
+			} else if( walker.isRedirect( formattedInput ) ){
+				System.out.println("\n" + formattedInput + " is a redirect. I don't like those.");
+			}else if( start == null ){
+				start = formattedInput;
+				System.out.println("\n\nEnter an ending article: ");
 			} else {
-				System.out.println(result + "\n" + (new Date().getTime() - start.getTime())/1000 + " seconds");
+				end = formattedInput;
+				System.out.println("Wiki-walking...");
+				Date startTime = new Date();
+				String result = walker.getWalk( start, end);
+				System.out.println(result + "\n" + 
+						(new Date().getTime() - startTime.getTime())/1000 + " seconds");
+				start = null;
+				end = null;
+				System.out.println("\n\nEnter a starting article: ");
 			}
+			
 		}
 		
+	}
+	
+	private static void getRandomWikiWalk() throws WikiApiException{
+		
+		String start = null;
+		
+		while( !isValidArticle( start = walker.getRandomArticle() ) ){
+			
+		}
+		
+		String end = null;
+		
+		while( !isValidArticle( end = walker.getRandomArticle() ) ){
+			
+		}
+		
+		System.out.println("Wiki-walking from " + start + " to " + end + "...");
+		Date startTime = new Date();
+		String result = walker.getWalk( start, end);
+		System.out.println(result + "\n" + 
+				(new Date().getTime() - startTime.getTime())/1000 + " seconds");		
+	}
+	
+	private static boolean isValidArticle( String article ) throws WikiApiException{
+		return walker.isTitle( article ) && !walker.isDisambiguationPage( article ) && !walker.isRedirect( article);
 	}
 
 	public WikiWalker getWalker() {
@@ -58,7 +115,7 @@ public class WikiConsole {
 	}
 
 	public void setWalker(WikiWalker walker) {
-		this.walker = walker;
+		WikiConsole.walker = walker;
 	}
 
 	

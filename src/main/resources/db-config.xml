@@ -3,6 +3,14 @@
 	xsi:schemaLocation="http://www.springframework.org/schema/beans
 	http://www.springframework.org/schema/beans/spring-beans-3.0.xsd">
 	
+	<bean id="dbConfig" class="de.tudarmstadt.ukp.wikipedia.api.DatabaseConfiguration">
+		<property name="host" value="${HOST}" />
+		<property name="database" value="${DATABASE}" />
+		<property name="user" value="${USER}" />
+		<property name="password" value="${PASSWORD}" />
+		<property name="language" value="english" />
+	</bean>
+	
 	<bean name="dataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource">
 	    <property name="driverClassName" value="com.mysql.jdbc.Driver" />
 	    <property name="url" value="jdbc:mysql://127.0.0.1:3306/wikipedia" />

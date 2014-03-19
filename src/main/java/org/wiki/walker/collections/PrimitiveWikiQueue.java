@@ -1,17 +1,15 @@
 package org.wiki.walker.collections;
 
 import gnu.trove.map.hash.TIntIntHashMap;
-import gnu.trove.map.hash.TIntObjectHashMap;
-import gnu.trove.set.hash.TIntHashSet;
 
-import java.util.HashMap;
+import it.unimi.dsi.fastutil.ints.IntAVLTreeSet;
+import it.unimi.dsi.fastutil.ints.IntSortedSet;
+
 import java.util.Iterator;
-import java.util.Map;
 import java.util.TreeSet;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.wiki.walker.WikiNode;
 
 /**
  * 
@@ -33,24 +31,20 @@ public final class PrimitiveWikiQueue /*implements Ordered<Integer>*/ {
 
 	private Log logger = LogFactory.getLog(getClass());
 	
-	private TIntIntHashMap shortestDistances = ShortestDistanceMap.getInstance().getShortestDistanceMap();
-	
-	//private Map<Integer, TreeSet<WikiNode>> buckets = new HashMap<Integer, TreeSet<WikiNode>>();
-	private TIntObjectHashMap<TreeSet<Integer>> buckets = new TIntObjectHashMap<TreeSet<Integer>>();
-	//private TIntObjectHashMap<TIntHashSet> buckets = new TIntObjectHashMap<TIntHashSet>();
-	
-	private TreeSet<Integer> hashes = new TreeSet<Integer>();
-	
 	private static final int MAX_DEGREES = 11;
 	
-	//TODO: think of different implementation for hash keys. boolean array?
+	private TIntIntHashMap shortestDistances = ShortestDistanceMap.getInstance().getShortestDistanceMap();
 	
+	private IntSortedSet[] distanceBuckets = new IntSortedSet[MAX_DEGREES];
+	
+	private TreeSet<Integer> distances = new TreeSet<Integer>();
+	
+	private int _size = 0;
 	
 	//@Override
 	public boolean contains( int id ){
 		
-		TreeSet<Integer> set = buckets.get( shortestDistances.get( id ) );
-		//TIntHashSet set = buckets.get( shortestDistances.get( id ) );
+		IntSortedSet set = distanceBuckets[shortestDistances.get( id )];
 		
 		if( set != null ){
 			return set.contains( id );
@@ -64,13 +58,13 @@ public final class PrimitiveWikiQueue /*implements Ordered<Integer>*/ {
 
 		int distance = shortestDistances.get( id );
 		
-		if( buckets.get( distance ) == null ){
-			buckets.put( distance, new TreeSet<Integer>() );
-			//buckets.put( distance, new TIntHashSet() );
-			hashes.add( distance );
+		if( distanceBuckets[distance] == null ){
+			distanceBuckets[distance] = new IntAVLTreeSet();	//this turns out being a great heuristic (the lower the ID, the more common the article)
+			distances.add( distance );
 		}
 		
-		buckets.get( distance ).add( id );
+		distanceBuckets[distance].add( id );
+		_size++;
 		
 		return true;
 	
@@ -78,55 +72,24 @@ public final class PrimitiveWikiQueue /*implements Ordered<Integer>*/ {
 
 	//@Override
 	public boolean remove( int id ) {
-
-//		boolean removed = false;
-//		
-//		if( !hashes.isEmpty() ){
-//			
-//			int hashToRemove = -1;
-//			
-//			Iterator<Integer> iterator = hashes.iterator();
-//			
-//			while( iterator.hasNext() ){
-//				
-//				int n = iterator.next();
-//				
-//				TreeSet<Integer> set = buckets.get( n );
-//				//TIntHashSet set = buckets.get( n );
-//				
-//				if( set.remove( id ) ){
-//					
-//					if( set.size() == 0) {
-//						buckets.remove( n );
-//						hashToRemove = n;		//don't want concurrent modification errors
-//					}
-//					
-//					removed = true;
-//				}
-//				
-//			}
-//			
-//			if( hashToRemove >= 0 ) hashes.remove( hashToRemove );
-//			
-//		}
-//		
-//		return removed;
 		
 		boolean removed = false;
 		
-		if( !hashes.isEmpty() ){
+		if( !distances.isEmpty() ){
 			
 			int hashToRemove = -1;
 			
-			for( int i = hashes.first(); i < MAX_DEGREES; i++ ){
+			IntSortedSet set;
+			for( int i = distances.first(); i < MAX_DEGREES; i++ ){
 				
-				TreeSet<Integer> set = buckets.get( i );
-				//TIntHashSet set = buckets.get( n );
+				set = distanceBuckets[i];
 				
 				if( set != null && set.remove( id ) ){
+				
+					_size--;
 					
 					if( set.size() == 0) {
-						buckets.remove( i );
+						distanceBuckets[i] = null;
 						hashToRemove = i;		//don't want concurrent modification errors
 					}
 					
@@ -135,7 +98,7 @@ public final class PrimitiveWikiQueue /*implements Ordered<Integer>*/ {
 				
 			}
 			
-			if( hashToRemove >= 0 ) hashes.remove( hashToRemove );
+			if( hashToRemove >= 0 ) distances.remove( hashToRemove );
 			
 		}
 		
@@ -145,54 +108,22 @@ public final class PrimitiveWikiQueue /*implements Ordered<Integer>*/ {
 	//@Override
 	public int poll() {
 		
-//		if( !hashes.isEmpty() ){
-//			
-//			Iterator<Integer> i = hashes.iterator();
-//			
-//			while( i.hasNext() ){
-//				
-//				int n = i.next();
-//				
-//				TreeSet<Integer> set = buckets.get( n );
-//				//TIntHashSet set = buckets.get( n );
-//				
-//				//TODO: for cleanup, but is it necessary?
-//				if( set == null ){
-//					
-//					hashes.remove( n );
-//					buckets.remove( n );
-//					
-//				} else {
-//					
-//					//TODO: will this ever throw a NPE?
-//					return set.first();
-//					//return set.iterator().next();
-//				}
-//				
-//			}
-//			
-//		}
-//		
-//		return -1;
-		
-		if( !hashes.isEmpty() ){
+		if( !distances.isEmpty() ){
 			
-			for( int i = hashes.first(); i < MAX_DEGREES; i++ ){
+			IntSortedSet set;
+			for( int i = distances.first(); i < MAX_DEGREES; i++ ){
 				
-				TreeSet<Integer> set = buckets.get( i );
-				//TIntHashSet set = buckets.get( n );
+				set = distanceBuckets[i];
 				
 				//TODO: for cleanup, but is it necessary?
 				if( set == null ){
 					
-					hashes.remove( i );
-					buckets.remove( i );
+					distances.remove( i );
+					distanceBuckets[i] = null;
 					
 				} else {
 					
-					//TODO: will this ever throw a NPE?
 					return set.first();
-					//return set.iterator().next();
 				}
 				
 			}
@@ -205,62 +136,32 @@ public final class PrimitiveWikiQueue /*implements Ordered<Integer>*/ {
 
 	//@Override
 	public void clear() {
-		buckets.clear();
-		hashes.clear();
+		distanceBuckets = new IntAVLTreeSet[MAX_DEGREES];
+		_size = 0;
+		distances.clear();
 	}
 
 	//@Override
 	public boolean isEmpty() {
-		
-//		Iterator<Integer> iterator = hashes.iterator();
-//		
-//		while( iterator.hasNext() ){
-//			
-//			if( !buckets.get( iterator.next() ).isEmpty() ){
-//				return false;
-//			}
-//			
-//		}
-		//TODO: should i bother checking more than 11 degrees?
-		for( int i = hashes.first(); i < MAX_DEGREES; i++){
-			
-			TreeSet<Integer> set = buckets.get( i );
-			
-			if( set != null && !set.isEmpty() ){
-				return false;
-			}
-			
-		}
-		
-		return true;
+		return _size < 1;
 	}
 
 
 	public int size(){
-		
-		int sum = 0;
-		Iterator<Integer> i = hashes.iterator();
-		
-		while( i.hasNext() ){
-			
-			sum += buckets.get( i.next() ).size();
-			
-		}
-		
-		return sum;
+		return _size;
 	}
 	
 	@Override
 	public String toString(){
 		
 		String result = "";
-		Iterator<Integer> i = hashes.iterator();
+		Iterator<Integer> i = distances.iterator();
 		
 		while( i.hasNext() ){
 			
 			int hash = i.next();
 			
-			result += hash + ": " + buckets.get( hash ) + "\n";
+			result += hash + ": " + distanceBuckets[hash].size() + "\n";
 		}
 		
 		return result;

@@ -5,7 +5,7 @@
  
  
  	<import resource="db-config.xml"/>
- <!-- 
+
 	<bean id="dbConfig" class="de.tudarmstadt.ukp.wikipedia.api.DatabaseConfiguration">
 		<property name="host" value="${HOST}" />
 		<property name="database" value="${DATABASE}" />
@@ -17,7 +17,7 @@
 	<bean id="wikipedia" class="de.tudarmstadt.ukp.wikipedia.api.Wikipedia">
 		<constructor-arg ref="dbConfig" />
 	</bean>
-	
+ <!-- 	
 	<bean id="wikiwalker" class="org.wiki.walker.JWPLWikiWalker">
 		<constructor-arg ref="wikipedia" />
 	</bean>
@@ -29,6 +29,7 @@
    -->
  <bean id="wikiwalker" class="org.wiki.walker.DaoWikiWalker">
 		<constructor-arg ref="wikiBoneCPDao" />
+		<constructor-arg ref="wikipedia" />
 	</bean>
  
 </beans>

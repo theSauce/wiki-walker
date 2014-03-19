@@ -3,6 +3,8 @@
  */
 package org.wiki.walker.dao;
 
+import java.util.List;
+
 import gnu.trove.set.hash.TIntHashSet;
 
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -75,5 +77,11 @@ public class WikipediaDao implements WikiDao{
 
 	public void setTemplate(JdbcTemplate template) {
 		this.template = template;
+	}
+
+	@Override
+	public List<String> getNamesByTokens(List<String> tokens) {
+		// TODO Auto-generated method stub
+		return null;
 	}
 }

@@ -1,0 +1,23 @@
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans
+	http://www.springframework.org/schema/beans/spring-beans-3.0.xsd">
+ 
+ 
+ 	<import resource="db-config.xml"/>
+ 
+ 	<bean id="wikipedia" class="de.tudarmstadt.ukp.wikipedia.api.Wikipedia">
+		<constructor-arg ref="dbConfig" />
+	</bean>
+ 
+ <bean id="wikiwalker" class="org.wiki.walker.DaoWikiWalker">
+		<constructor-arg ref="wikiBoneCPDao" />
+		<constructor-arg ref="wikipedia" />
+	</bean>
+ 
+ <bean id="wikiConsole" class="org.wiki.walker.ui.WikiConsole" >
+ 	<property name="walker" ref="wikiwalker" />
+ </bean>
+ 
+ 
+</beans>

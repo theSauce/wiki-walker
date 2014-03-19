@@ -1,7 +1,5 @@
 package org.wiki.walker.run;
 
-import java.io.File;
-
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 public class SpringMain {

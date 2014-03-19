@@ -7,6 +7,8 @@ import gnu.trove.iterator.TIntIterator;
 import gnu.trove.map.hash.TIntIntHashMap;
 import gnu.trove.set.hash.TIntHashSet;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
@@ -17,13 +19,16 @@ import java.util.Map;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.stereotype.Component;
+import org.wiki.walker.collections.PrimitiveWikiPriorityQueue;
 import org.wiki.walker.collections.PrimitiveWikiQueue;
 import org.wiki.walker.collections.ShortestDistanceMap;
 import org.wiki.walker.collections.WikiQueue;
 import org.wiki.walker.dao.WikiDao;
 import org.wiki.walker.dao.WikipediaBoneCPDao;
 import org.wiki.walker.dao.WikipediaDao;
+import org.wiki.walker.format.WikiFormatter;
 
+import de.tudarmstadt.ukp.wikipedia.api.Wikipedia;
 import de.tudarmstadt.ukp.wikipedia.api.exception.WikiApiException;
 
 /**
@@ -33,29 +38,29 @@ import de.tudarmstadt.ukp.wikipedia.api.exception.WikiApiException;
 @Component
 public class DaoWikiWalker implements WikiWalker{
 
-	//private WikipediaDao dao;
 	private WikiDao dao;
+	
+	private Wikipedia wiki;
 	
 	private Log logger = LogFactory.getLog(getClass());
 	
-	//private Map<Integer, Integer> shortestDistances = ShortestDistanceMap.getInstance().getShortestDistanceMap();
 	private TIntIntHashMap shortestDistances = ShortestDistanceMap.getInstance().getShortestDistanceMap();
 	
 	private PrimitiveWikiQueue unsettled = new PrimitiveWikiQueue();
+	//private PrimitiveWikiPriorityQueue unsettled = new PrimitiveWikiPriorityQueue();
 	
-	//private Set<Integer> settled = new HashSet<Integer>();
 	private TIntHashSet settled = new TIntHashSet();
 	
-	//private Map<Integer, Integer> predecessors = new HashMap<Integer, Integer>();
-	//private int[] predecessors = new int[40000000];
 	private TIntIntHashMap predecessors = new TIntIntHashMap();
 	
 	
-	public DaoWikiWalker( WikiDao dao ) {
+	public DaoWikiWalker( WikiDao dao, Wikipedia wikipedia ) {
 		this.dao = dao;
-		Date start = new Date();
-		System.out.println( getWalk("ToeJam_&_Earl_in_Panic_on_Funkotron", "Orchestrion") );
-		System.out.println( (new Date().getTime() - start.getTime())/(1000) + " seconds");
+		this.wiki = wikipedia;
+		//Date start = new Date();
+		//System.out.println( getWalk("ToeJam_&_Earl_in_Panic_on_Funkotron", "Orchestrion") );
+		//System.out.println( getWalk("Poopy", "Gun") );
+		//System.out.println( (new Date().getTime() - start.getTime())/(1000) + " seconds");
 	}
 	
 	private void init(int start) {
@@ -79,8 +84,6 @@ public class DaoWikiWalker implements WikiWalker{
 			int start;
 			int end;
 			try {
-				
-				//System.out.println( wiki.getPage( startString ).getText() );
 				
 				start = dao.getId( startString );
 				end = dao.getId( endString );	
@@ -182,8 +185,6 @@ public class DaoWikiWalker implements WikiWalker{
     }
 	
     private void setShortestDistance( int id, int distance ) {
-
-    	//id.setShortestDistance( distance );
     	
     	unsettled.remove(id);
     	
@@ -196,26 +197,36 @@ public class DaoWikiWalker implements WikiWalker{
 	private void getStatus() {
 	
 		logger.info( "****CURRENT STATUS****" );
-		//logger.info( new Date() );
-		logger.info( "Settled: " + settled.size() );
-		logger.info( "Unsettled: " + unsettled.size() );
-		//logger.info( "Contents:\n" + unsettled );
+		logger.info( "  Settled: " + settled.size() );
+		logger.info( "Unsettled: " + unsettled.size() + "\n" + unsettled );
 		
+	}
+	
+	@Override
+	public boolean isTitle(String title) {
+		return dao.getId( title ) != -1;
+	}
+	
+	@Override
+	public boolean isDisambiguationPage(String title) throws WikiApiException {
+		return wiki.getPage( title ).isDisambiguation();
+	}
+	
+	@Override
+	public boolean isRedirect( String title ) throws WikiApiException{
+		return wiki.getPage( title ).isRedirect();
+	}
+	
+	@Override
+	public List<String> getArticleSuggestions( String article ) {
+		
+		return dao.getNamesByTokens( WikiFormatter.tokenizeArticleName( article ) );
 	}
 	
 	public String getMoonWalk( String start, String end ){
 		return getWalk( end, start );
 	}
 	
-	
-//	public WikipediaDao getDao() {
-//		return dao;
-//	}
-//
-//
-//	public void setDao(WikipediaDao dao) {
-//		this.dao = dao;
-//	}
 
 	public WikiDao getDao() {
 		return dao;
@@ -225,4 +236,11 @@ public class DaoWikiWalker implements WikiWalker{
 	public void setDao(WikiDao dao) {
 		this.dao = dao;
 	}
+
+	@Override
+	public String getRandomArticle() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
 }

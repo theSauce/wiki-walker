@@ -195,4 +195,34 @@ public class JWPLWikiWalker implements WikiWalker {
 	public void setWiki(Wikipedia wiki){
 		this.wiki = wiki;
 	}
+
+	@Override
+	public boolean isTitle(String title) {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	@Override
+	public boolean isDisambiguationPage(String title) {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	@Override
+	public boolean isRedirect(String title) {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	@Override
+	public String getRandomArticle() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public List<String> getArticleSuggestions(String string) {
+		// TODO Auto-generated method stub
+		return null;
+	}
 }

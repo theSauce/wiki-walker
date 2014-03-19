@@ -9,8 +9,7 @@ public class ShortestDistanceMap {
 
 	private static ShortestDistanceMap singleton;
 	
-	//private Map<Integer, Integer> shortestDistances = new HashMap<Integer, Integer>();
-	private TIntIntHashMap shortestDistances = new TIntIntHashMap(10, 0.5f, -1, -1);
+	private TIntIntHashMap shortestDistances = new TIntIntHashMap(1000000, 0.75f, -1, -1);
 	
 	private ShortestDistanceMap(){/*Singleton*/}
 	
