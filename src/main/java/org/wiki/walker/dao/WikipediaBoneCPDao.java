@@ -14,8 +14,6 @@ import gnu.trove.set.hash.TIntHashSet;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.wiki.walker.WikiUtils;
 
 import com.jolbox.bonecp.BoneCP;
@@ -28,7 +26,7 @@ public class WikipediaBoneCPDao implements WikiDao{
 
 	private Log logger = LogFactory.getLog(getClass());
 	
-	private BoneCP boneCP;
+	protected BoneCP boneCP;
 	
 	private static final String SQL_WILDCARD = "%";
 	private static final String GET_NAMES_SELECT_CLAUSE = "SELECT name FROM wikipedia.page";

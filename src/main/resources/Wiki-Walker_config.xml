@@ -28,7 +28,8 @@
 	</bean>
    -->
  <bean id="wikiwalker" class="org.wiki.walker.DaoWikiWalker">
-		<constructor-arg ref="wikiBoneCPDao" />
+		<!-- <constructor-arg ref="wikiBoneCPDao" /> -->
+		<constructor-arg ref="wikiCache" />
 		<constructor-arg ref="wikipedia" />
 	</bean>
  

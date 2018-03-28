@@ -8,9 +8,6 @@ import it.unimi.dsi.fastutil.ints.IntSortedSet;
 import java.util.Iterator;
 import java.util.TreeSet;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
 /**
  * 
  * The odd needs of the Wiki-Walker required the creation of a new collection. The problem
@@ -29,8 +26,6 @@ import org.apache.commons.logging.LogFactory;
 
 public final class PrimitiveWikiQueue /*implements Ordered<Integer>*/ {
 
-	private Log logger = LogFactory.getLog(getClass());
-	
 	private static final int MAX_DEGREES = 11;
 	
 	private TIntIntHashMap shortestDistances = ShortestDistanceMap.getInstance().getShortestDistanceMap();
@@ -154,17 +149,20 @@ public final class PrimitiveWikiQueue /*implements Ordered<Integer>*/ {
 	@Override
 	public String toString(){
 		
-		String result = "";
+		StringBuilder result = new StringBuilder();
 		Iterator<Integer> i = distances.iterator();
 		
 		while( i.hasNext() ){
 			
 			int hash = i.next();
 			
-			result += hash + ": " + distanceBuckets[hash].size() + "\n";
+			result.append( hash );
+			result.append( ": " ); 
+			result.append( distanceBuckets[hash].size() );
+			result.append( "\n" );
 		}
 		
-		return result;
+		return result.toString();
 	}
 
 }

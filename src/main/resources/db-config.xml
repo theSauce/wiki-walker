@@ -52,5 +52,7 @@
 		<!--<constructor-arg ref="wikiTemplate" />-->
 	</bean>
 
-
+	<bean name="wikiCache" class="org.wiki.walker.dao.WikiCache">
+		<constructor-arg ref="boneCP" />
+	</bean>
 </beans>
